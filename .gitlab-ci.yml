@@ -1,0 +1,60 @@
+image: registry.gitlab.com/sawangsulnateknologistudio/akunting-be:latest
+
+stages:
+  - composer
+  - test
+  - deploy_development
+
+composer:
+  stage: composer
+  tags:
+    - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-composer
+    paths:
+      - vendor/
+  script:
+      - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+      - cp .env.example .env
+      - php artisan key:generate
+      - php artisan passport:keys
+  artifacts:
+    expire_in: 1 month
+    paths:
+      - vendor/
+      - .env
+      - storage/oauth-public.key
+      - storage/oauth-private.key
+  only:
+    - master
+    - development
+    - /^sprint\/.*$/
+    - /^bugfix\/.*$/
+    - /^feature\/.*$/
+
+unit_test:
+  stage: test
+  dependencies:
+    - composer
+  script:
+    - php artisan test --parallel --stop-on-failure --configuration phpunit.xml
+  only:
+    - master
+    - development
+    - /^sprint\/.*$/
+    - /^bugfix\/.*$/
+    - /^feature\/.*$/
+
+deploy_development:
+  stage: deploy_development
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_DEV")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+    - ~/.composer/vendor/bin/envoy run updateCodeDev --commit="$CI_COMMIT_SHA"
+  when: manual
+  only:
+    - development

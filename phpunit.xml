@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </coverage>
+    <php>
+        <ini name="memory_limit" value="-1" />
+        <env name="APP_ENV" value="testing" force="true" />
+        <env name="BCRYPT_ROUNDS" value="4" force="true" />
+        <env name="APP_URL" value="http://127.0.0.1:8001" force="true" />
+        <env name="DB_CONNECTION" value="sqlite" force="true" />
+        <env name="DB_DATABASE" value=":memory:" force="true" />
+        <env name="CACHE_DRIVER" value="array" force="true" />
+        <env name="SESSION_DRIVER" value="array" force="true" />
+        <env name="QUEUE_DRIVER" value="sync" force="true" />
+        <env name="MAIL_MAILER" value="array" force="true" />
+        <env name="FILESYSTEM_DRIVER" value="public" force="true" />
+        <env name="FPROT_MOCK_ALWAYS_CLEAN" value="true" force="true" />
+        <env name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>
